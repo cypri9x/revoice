@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -19,6 +19,8 @@ export default function Camera() {
   const [capturing, setCapturing] = useState(false);
   const [captureStep, setCaptureStep] = useState(0);
   const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [lastFrames, setLastFrames] = useState<string[]>([]);
+  const [hint, setHint] = useState('');
   const [error, setError] = useState('');
 
   useFocusEffect(useCallback(() => { setActive(true); return () => setActive(false); }, []));
@@ -38,6 +40,7 @@ export default function Camera() {
         if (index < 3) await wait(550);
       }
       setCaptureStep(0);
+      setLastFrames(frames);
       setSuggestions(await getVisualIntentSuggestions(frames));
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : 'Please try again.');
@@ -45,6 +48,15 @@ export default function Camera() {
       setCaptureStep(0);
       setCapturing(false);
     }
+  };
+
+  const refine = async () => {
+    if (lastFrames.length !== 3 || !hint.trim()) return;
+    setCapturing(true);
+    setError('');
+    try { setSuggestions(await getVisualIntentSuggestions(lastFrames, hint)); setHint(''); }
+    catch (caught) { setError(caught instanceof Error ? caught.message : 'Please try again.'); }
+    finally { setCapturing(false); }
   };
 
   if (!permission) return <SafeAreaView style={styles.loading}><ActivityIndicator color={colors.primary} /></SafeAreaView>;
@@ -61,7 +73,7 @@ export default function Camera() {
       {!capturing && <View style={styles.cameraHint}><Ionicons name="scan-outline" size={20} color="white" /><Text style={styles.cameraHintText}>Point at the situation, then tap anywhere</Text></View>}
     </Pressable>
     <View style={styles.panel}>
-      {error ? <ErrorCard message={error} /> : suggestions.length ? <><Text style={styles.panelTitle}>What might you want to say?</Text>{suggestions.map(suggestion => <Pressable key={suggestion} onPress={() => router.push({ pathname: '/speak', params: { text: suggestion } })} style={styles.suggestion}><Text style={styles.suggestionText}>{suggestion}</Text><Ionicons name="play-circle" size={38} color="#2867FA" /></Pressable>)}</> : <><Text style={styles.panelTitle}>Show the moment, not just an object.</Text><Text style={styles.panelCopy}>ReVoice captures three temporary frames to understand what is happening. You always choose the phrase before anything is spoken.</Text><Pressable onPress={understandMoment} disabled={!ready || capturing} style={[styles.captureButton, (!ready || capturing) && { opacity: 0.55 }]}>{capturing ? <ActivityIndicator color="white" /> : <><View style={styles.captureDot} /><Text style={styles.captureButtonText}>Understand this moment</Text></>}</Pressable></>}
+      {error ? <ErrorCard message={error} /> : suggestions.length ? <><Text style={styles.panelTitle}>What might you want to say?</Text>{suggestions.map(suggestion => <Pressable key={suggestion} onPress={() => router.push({ pathname: '/speak', params: { text: suggestion } })} style={styles.suggestion}><Text style={styles.suggestionText}>{suggestion}</Text><Ionicons name="play-circle" size={38} color="#2867FA" /></Pressable>)}<Text style={styles.notQuite}>None of these? Add one small clue.</Text><View style={styles.refineRow}><TextInput value={hint} onChangeText={setHint} placeholder="Example: I want help" placeholderTextColor="#94A3B8" maxLength={160} style={styles.hintInput} onSubmitEditing={refine}/><Pressable onPress={refine} disabled={!hint.trim()||capturing} style={[styles.refineButton,(!hint.trim()||capturing)&&{opacity:.45}]}>{capturing?<ActivityIndicator color="white"/>:<Ionicons name="sparkles" size={21} color="white"/>}</Pressable></View></> : <><Text style={styles.panelTitle}>Show the moment, not just an object.</Text><Text style={styles.panelCopy}>ReVoice captures three temporary frames to understand what is happening. You always choose the phrase before anything is spoken.</Text><Pressable onPress={understandMoment} disabled={!ready || capturing} style={[styles.captureButton, (!ready || capturing) && { opacity: 0.55 }]}>{capturing ? <ActivityIndicator color="white" /> : <><View style={styles.captureDot} /><Text style={styles.captureButtonText}>Understand this moment</Text></>}</Pressable></>}
       {suggestions.length > 0 && <Pressable onPress={understandMoment} style={styles.tryAgain}><Ionicons name="refresh" size={18} color={colors.primary} /><Text style={styles.tryAgainText}>Scan another moment</Text></Pressable>}
       <Text style={styles.privacy}>Three frames are sent securely for analysis and are not stored by ReVoice.</Text>
     </View>
@@ -75,5 +87,5 @@ const styles = StyleSheet.create({
   cameraWrap: { height: '47%', minHeight: 300, backgroundColor: colors.navy, overflow: 'hidden' }, vignette: { position: 'absolute', inset: 0, backgroundColor: 'rgba(3,10,35,0.12)' }, guide: { position: 'absolute', inset: 28 }, cornerTopLeft: { ...corner, top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3, borderTopLeftRadius: 8 }, cornerTopRight: { ...corner, top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3, borderTopRightRadius: 8 }, cornerBottomLeft: { ...corner, bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3, borderBottomLeftRadius: 8 }, cornerBottomRight: { ...corner, bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3, borderBottomRightRadius: 8 },
   cameraHint: { position: 'absolute', bottom: 18, alignSelf: 'center', flexDirection: 'row', gap: 8, alignItems: 'center', backgroundColor: 'rgba(7,20,59,0.75)', paddingVertical: 9, paddingHorizontal: 14, borderRadius: 99 }, cameraHintText: { color: 'white', fontFamily: 'Jakarta-Medium', fontSize: 12 }, captureOverlay: { position: 'absolute', inset: 0, backgroundColor: 'rgba(7,20,59,0.72)', alignItems: 'center', justifyContent: 'center' }, pulse: { width: 74, height: 74, borderRadius: 37, backgroundColor: 'rgba(255,255,255,0.18)', borderWidth: 2, borderColor: 'white', alignItems: 'center', justifyContent: 'center' }, captureNumber: { color: 'white', fontFamily: 'Jakarta-ExtraBold', fontSize: 28 }, captureTitle: { color: 'white', fontFamily: 'Jakarta-Bold', fontSize: 17, marginTop: 15 }, captureCopy: { color: 'rgba(255,255,255,0.78)', fontFamily: 'Jakarta-Regular', fontSize: 12, marginTop: 5 },
   panel: { flex: 1, padding: 18, backgroundColor: colors.background }, panelTitle: { fontFamily: 'Jakarta-Bold', fontSize: 18, color: colors.text }, panelCopy: { fontFamily: 'Jakarta-Regular', fontSize: 12, lineHeight: 18, color: colors.muted, marginTop: 5 }, captureButton: { minHeight: 58, borderRadius: radius.md, backgroundColor: '#2867FA', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 11, marginTop: 14, ...shadow }, captureDot: { width: 17, height: 17, borderRadius: 9, backgroundColor: 'white', borderWidth: 4, borderColor: '#C9DAFF' }, captureButtonText: { fontFamily: 'Jakarta-SemiBold', fontSize: 15, color: 'white' },
-  suggestion: { minHeight: 62, padding: 12, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 }, suggestionText: { flex: 1, fontFamily: 'Jakarta-Medium', fontSize: 13, lineHeight: 19, color: colors.text }, tryAgain: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 12 }, tryAgainText: { fontFamily: 'Jakarta-SemiBold', fontSize: 12, color: colors.primary }, privacy: { fontFamily: 'Jakarta-Regular', fontSize: 9, color: '#94A3B8', textAlign: 'center', marginTop: 10 },
+  suggestion: { minHeight: 62, padding: 12, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8 }, suggestionText: { flex: 1, fontFamily: 'Jakarta-Medium', fontSize: 13, lineHeight: 19, color: colors.text }, notQuite:{fontFamily:'Jakarta-SemiBold',fontSize:11,color:colors.muted,marginTop:10},refineRow:{flexDirection:'row',gap:8,marginTop:6},hintInput:{flex:1,minHeight:44,borderRadius:radius.sm,borderWidth:1,borderColor:colors.border,backgroundColor:colors.surface,paddingHorizontal:12,fontFamily:'Jakarta-Regular',fontSize:12,color:colors.text},refineButton:{width:46,borderRadius:radius.sm,backgroundColor:colors.purple,alignItems:'center',justifyContent:'center'}, tryAgain: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 12 }, tryAgainText: { fontFamily: 'Jakarta-SemiBold', fontSize: 12, color: colors.primary }, privacy: { fontFamily: 'Jakarta-Regular', fontSize: 9, color: '#94A3B8', textAlign: 'center', marginTop: 10 },
 });

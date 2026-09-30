@@ -13,8 +13,8 @@ export async function getIntentSuggestions(fragments: string[]) {
   return parseResponse(response);
 }
 
-export async function getVisualIntentSuggestions(images: string[]) {
+export async function getVisualIntentSuggestions(images: string[], hint?: string) {
   if (!API_BASE_URL) throw new Error('Connect the ReVoice backend to use Camera Assist.');
-  const response = await fetch(`${API_BASE_URL}/api/visual-intent`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ images }) });
+  const response = await fetch(`${API_BASE_URL}/api/visual-intent`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ images, hint: hint?.trim() || undefined }) });
   return parseResponse(response);
 }
