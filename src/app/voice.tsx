@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ErrorCard, ScreenHeader } from '../components/ui';
 import { colors, radius, shadow } from '../theme';
 import { getVoiceIntentSuggestions } from '../services/api';
+import { getCareProfile } from '../services/storage';
 
 export default function VoiceIntent() {
   const router = useRouter();
@@ -36,7 +37,9 @@ export default function VoiceIntent() {
       try {
         const audio = await new File(recorder.uri).base64();
         const mimeType = recorder.uri.endsWith('.3gp') ? 'audio/3gpp' : recorder.uri.endsWith('.webm') ? 'audio/webm' : 'audio/m4a';
-        const result = await getVoiceIntentSuggestions(audio, mimeType);
+        const profile = await getCareProfile();
+        const context = Object.fromEntries(Object.entries(profile).filter(([, value]) => value.trim()));
+        const result = await getVoiceIntentSuggestions(audio, mimeType, context);
         setTranscript(result.transcript);
         setSuggestions(result.suggestions);
       } catch (caught) {

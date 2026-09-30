@@ -7,7 +7,9 @@ export const SuggestionOutput = z.object({ suggestions: z.array(z.string().min(1
 const system = `You are an assistive communication interpretation engine for ReVoice.
 Return exactly three short, meaningfully distinct possible sentences the user may intend to communicate.
 Preserve uncertainty. Never choose for the user. Never add medical advice or diagnose anything.
-Use simple, natural English. Each suggestion must be ready to speak aloud.`;
+Use simple, natural English. Each suggestion must be ready to speak aloud.
+Never output placeholders such as [name], [person], or blanks. Never invent a missing name or fact.
+When information is incomplete, offer natural sentences that preserve that uncertainty, such as "I want to introduce myself" or "Please give me a moment to finish."`;
 
 export async function createSuggestions(input: string | OpenAI.Responses.ResponseInput) {
   if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not configured');
@@ -22,7 +24,7 @@ export async function transcribeAudio(audio: string, mimeType: string) {
   const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 1 });
   const extension = mimeType.includes('webm') ? 'webm' : 'm4a';
   const file = await toFile(Buffer.from(audio, 'base64'), `revoice-input.${extension}`, { type: mimeType });
-  const result = await client.audio.transcriptions.create({ file, model: 'gpt-4o-mini-transcribe', language: 'en', prompt: 'Assistive communication fragments or an incomplete sentence.' });
+  const result = await client.audio.transcriptions.create({ file, model: 'gpt-4o-mini-transcribe', language: 'en', prompt: 'Transcribe the exact words spoken. Preserve incomplete sentences exactly. Do not add placeholders, bracketed words, missing names, or completions.' });
   return result.text.trim();
 }
 

@@ -3,7 +3,7 @@ import { apiError, createSuggestions, transcribeAudio } from '../backend/openai'
 
 type ApiRequest = { method?: string; body?: unknown };
 type ApiResponse = { status(code: number): ApiResponse; json(body: unknown): void };
-const Input = z.object({ audio: z.string().min(100).max(5_000_000), mimeType: z.enum(['audio/m4a', 'audio/mp4', 'audio/webm']) }).strict();
+const Input = z.object({ audio: z.string().min(100).max(5_000_000), mimeType: z.enum(['audio/m4a', 'audio/mp4', 'audio/webm']), context: z.record(z.string(), z.string().max(240)).optional() }).strict();
 export const config = { api: { bodyParser: { sizeLimit: '6mb' } } };
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
@@ -13,7 +13,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   try {
     const transcript = await transcribeAudio(parsed.data.audio, parsed.data.mimeType);
     if (!transcript) return res.status(422).json({ error: 'No speech was detected.' });
-    const suggestions = await createSuggestions(`The user spoke this incomplete or uncertain communication attempt: ${transcript}`);
+    if (/^\s*\[[^\]]+\]\s*[.!?]?\s*$/i.test(transcript)) return res.status(422).json({ error: 'We only heard a missing detail. Please try again and speak a little longer.' });
+    const context = parsed.data.context ? ` Known personal context: ${JSON.stringify(parsed.data.context)}. Use it only when directly relevant; never invent missing facts.` : '';
+    const suggestions = await createSuggestions(`The user spoke this incomplete or uncertain communication attempt: ${transcript}.${context}`);
     return res.status(200).json({ transcript, suggestions });
   } catch (error) {
     const result = apiError(error);

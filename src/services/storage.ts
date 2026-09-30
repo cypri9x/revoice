@@ -6,9 +6,9 @@ const ONBOARDING_KEY = '@revoice/onboarding';
 const QUICK_CARDS_KEY = '@revoice/quick-cards';
 const PROFILE_KEY = '@revoice/care-profile';
 
-export type CareProfile = { people: string; places: string; routine: string; preferences: string };
+export type CareProfile = { name: string; people: string; places: string; routine: string; preferences: string };
 export type QuickCard = { icon: string; label: string; text: string };
-export const emptyCareProfile: CareProfile = { people: '', places: '', routine: '', preferences: '' };
+export const emptyCareProfile: CareProfile = { name: '', people: '', places: '', routine: '', preferences: '' };
 
 export async function hasCompletedOnboarding() { return (await AsyncStorage.getItem(ONBOARDING_KEY)) === 'true'; }
 export async function completeOnboarding() { await AsyncStorage.setItem(ONBOARDING_KEY, 'true'); }
