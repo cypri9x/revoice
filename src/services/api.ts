@@ -18,3 +18,12 @@ export async function getVisualIntentSuggestions(images: string[], hint?: string
   const response = await fetch(`${API_BASE_URL}/api/visual-intent`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ images, hint: hint?.trim() || undefined }) });
   return parseResponse(response);
 }
+
+export async function getVoiceIntentSuggestions(audio: string, mimeType: string): Promise<{ transcript: string; suggestions: string[] }> {
+  if (!API_BASE_URL) throw new Error('Connect the ReVoice backend to use voice suggestions.');
+  const response = await fetch(`${API_BASE_URL}/api/voice-intent`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ audio, mimeType }) });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.error || 'Voice suggestions are unavailable right now.');
+  if (!Array.isArray(data.suggestions) || data.suggestions.length !== 3) throw new Error('The suggestion response was incomplete.');
+  return { transcript: String(data.transcript || ''), suggestions: data.suggestions };
+}

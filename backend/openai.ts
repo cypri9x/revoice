@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { toFile } from 'openai/uploads';
 import { zodTextFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 
@@ -14,6 +15,15 @@ export async function createSuggestions(input: string | OpenAI.Responses.Respons
   const response = await client.responses.parse({ model: 'gpt-4.1-mini', instructions: system, input, max_output_tokens: 350, text: { format: zodTextFormat(SuggestionOutput, 'suggestions') } });
   if (!response.output_parsed) throw new Error('The model returned an incomplete response');
   return SuggestionOutput.parse(response.output_parsed).suggestions.map(value => value.trim());
+}
+
+export async function transcribeAudio(audio: string, mimeType: string) {
+  if (!process.env.OPENAI_API_KEY) throw new Error('OPENAI_API_KEY is not configured');
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY, timeout: 20_000, maxRetries: 1 });
+  const extension = mimeType.includes('3gpp') ? '3gp' : mimeType.includes('webm') ? 'webm' : 'm4a';
+  const file = await toFile(Buffer.from(audio, 'base64'), `revoice-input.${extension}`, { type: mimeType });
+  const result = await client.audio.transcriptions.create({ file, model: 'gpt-4o-mini-transcribe', language: 'en', prompt: 'Assistive communication fragments or an incomplete sentence.' });
+  return result.text.trim();
 }
 
 export function apiError(error: unknown) {
