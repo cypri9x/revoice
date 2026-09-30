@@ -3,7 +3,7 @@ import { apiError, createSuggestions } from '../backend/openai';
 
 type ApiRequest = { method?: string; body?: unknown };
 type ApiResponse = { status(code: number): ApiResponse; json(body: unknown): void };
-const Input = z.object({ fragments: z.array(z.string().trim().min(1).max(60)).min(1).max(12), context: z.record(z.string(), z.string().max(120)).optional() }).strict();
+const Input = z.object({ fragments: z.array(z.string().trim().min(1).max(180)).min(1).max(12), context: z.record(z.string(), z.string().max(240)).optional() }).strict();
 
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed.' });

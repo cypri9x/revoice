@@ -54,8 +54,15 @@
           "cameraPermission": "Allow ReVoice to use the camera to suggest communication options."
         }
       ],
-      ["expo-audio", {"microphonePermission": "Allow ReVoice to listen only when you choose to record a Voice Intent.", "enableBackgroundRecording": false}],
-      "expo-asset"
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow ReVoice to listen only when you choose to record a Voice Intent.",
+          "enableBackgroundRecording": false
+        }
+      ],
+      "expo-asset",
+      "expo-speech-recognition"
     ]
   }
 }

@@ -7,9 +7,9 @@ async function parseResponse(response: Response): Promise<string[]> {
   return data.suggestions;
 }
 
-export async function getIntentSuggestions(fragments: string[]) {
+export async function getIntentSuggestions(fragments: string[], context?: Record<string, string>) {
   if (!API_BASE_URL) throw new Error('Connect the ReVoice backend to use AI suggestions.');
-  const response = await fetch(`${API_BASE_URL}/api/intent`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fragments }) });
+  const response = await fetch(`${API_BASE_URL}/api/intent`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fragments, context }) });
   return parseResponse(response);
 }
 
