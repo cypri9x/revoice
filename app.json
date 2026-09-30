@@ -31,6 +31,7 @@
       "expo-status-bar",
       "expo-font",
       ["expo-splash-screen", {"image": "./assets/branding/revoice-symbol-transparent.png", "imageWidth": 220, "resizeMode": "contain", "backgroundColor": "#F8FAFF"}],
+      ["expo-camera", {"cameraPermission": "Allow ReVoice to understand the situation you choose to show.", "recordAudioAndroid": false, "barcodeScannerEnabled": false}],
       ["expo-image-picker", {"photosPermission": "Allow ReVoice to use a photo to suggest communication options.", "cameraPermission": "Allow ReVoice to use the camera to suggest communication options."}]
     ]
   }
