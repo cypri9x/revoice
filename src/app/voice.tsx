@@ -11,7 +11,7 @@ import { getVoiceIntentSuggestions } from '../services/api';
 
 export default function VoiceIntent() {
   const router = useRouter();
-  const recorder = useAudioRecorder(RecordingPresets.LOW_QUALITY);
+  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const recorderState = useAudioRecorderState(recorder, 200);
   const [permission, setPermission] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(false);
