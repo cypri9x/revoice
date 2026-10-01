@@ -34,6 +34,17 @@ ReVoice uses large touch targets, a calm high-contrast visual hierarchy, recogni
 
 https://github.com/cypri9x/revoice
 
+## Demo video
+
+Add the final public or unlisted YouTube/Vimeo URL here before submitting:
+
+`VIDEO_URL_PENDING`
+
+## Submission assets
+
+- App icon: [`submission/revoice-icon-1024.png`](./submission/revoice-icon-1024.png)
+- Home screenshot: [`submission/revoice-home-1179x2556.png`](./submission/revoice-home-1179x2556.png)
+
 ## Demo checklist
 
 - Keep the published video under two minutes.

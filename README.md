@@ -6,6 +6,8 @@ ReVoice is an assistive communication app for people who know what they want to 
 
 **Human intent → AI assistance → human choice → voice**
 
+![ReVoice Home](./submission/revoice-home-1179x2556.png)
+
 ## Features
 
 - Quick Speak essentials that remain available without AI
@@ -71,6 +73,8 @@ ReVoice is an assistive communication tool. It does not diagnose, treat, or prov
 ## Shipaton
 
 Created by Gustavo de Carvalho Cypriano, University of São Paulo (USP), for RevenueCat Shipaton 2026 — Next Gen.
+
+Submission-ready assets and copy are available in [`submission/`](./submission) and [`SUBMISSION.md`](./SUBMISSION.md).
 
 ## License
 
