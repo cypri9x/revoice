@@ -1,13 +1,72 @@
-import { Platform } from 'react-native';
-import Purchases, { LOG_LEVEL, PurchasesPackage } from 'react-native-purchases';
+import { Platform } from "react-native";
+import Purchases, {
+  CustomerInfo,
+  CustomerInfoUpdateListener,
+  LOG_LEVEL,
+  PurchasesOffering,
+  PurchasesPackage,
+} from "react-native-purchases";
 
-const key = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY;
+export const REVENUECAT_ENTITLEMENT = "pro";
+const apiKey = process.env.EXPO_PUBLIC_REVENUECAT_API_KEY?.trim();
 let configured = false;
-export async function configureRevenueCat() {
-  if (!key || Platform.OS === 'web' || configured) return false;
-  try { Purchases.setLogLevel(LOG_LEVEL.WARN); Purchases.configure({ apiKey: key }); configured = true; return true; } catch { return false; }
+
+export function isRevenueCatAvailable() {
+  return Platform.OS !== "web" && Boolean(apiKey);
 }
-export async function getOfferings() { if (!(await configureRevenueCat())) return null; return (await Purchases.getOfferings()).current; }
-export async function purchasePackage(pkg: PurchasesPackage) { const result = await Purchases.purchasePackage(pkg); return result.customerInfo.entitlements.active.pro != null; }
-export async function restorePurchases() { if (!(await configureRevenueCat())) return false; const info = await Purchases.restorePurchases(); return info.entitlements.active.pro != null; }
-export async function hasProEntitlement() { if (!(await configureRevenueCat())) return false; const info = await Purchases.getCustomerInfo(); return info.entitlements.active.pro != null; }
+
+export async function configureRevenueCat() {
+  if (configured) return true;
+  if (!isRevenueCatAvailable()) return false;
+  Purchases.setLogLevel(__DEV__ ? LOG_LEVEL.DEBUG : LOG_LEVEL.WARN);
+  Purchases.configure({ apiKey: apiKey! });
+  configured = true;
+  return true;
+}
+
+async function requireConfiguration() {
+  if (!(await configureRevenueCat()))
+    throw new Error(
+      "RevenueCat is unavailable. Open ReVoice in the Android Development Build.",
+    );
+}
+
+export function hasProEntitlement(customerInfo: CustomerInfo | null) {
+  return customerInfo?.entitlements.active[REVENUECAT_ENTITLEMENT] != null;
+}
+
+export async function getRevenueCatState(): Promise<{
+  customerInfo: CustomerInfo;
+  offering: PurchasesOffering | null;
+}> {
+  await requireConfiguration();
+  const [customerInfo, offerings] = await Promise.all([
+    Purchases.getCustomerInfo(),
+    Purchases.getOfferings(),
+  ]);
+  return { customerInfo, offering: offerings.current };
+}
+
+export async function purchaseRevenueCatPackage(pkg: PurchasesPackage) {
+  await requireConfiguration();
+  return (await Purchases.purchasePackage(pkg)).customerInfo;
+}
+
+export async function restoreRevenueCatPurchases() {
+  await requireConfiguration();
+  return Purchases.restorePurchases();
+}
+
+export function addCustomerInfoListener(listener: CustomerInfoUpdateListener) {
+  Purchases.addCustomerInfoUpdateListener(listener);
+  return () => Purchases.removeCustomerInfoUpdateListener(listener);
+}
+
+export function isPurchaseCancelled(error: unknown) {
+  return Boolean(
+    error &&
+    typeof error === "object" &&
+    "userCancelled" in error &&
+    error.userCancelled,
+  );
+}

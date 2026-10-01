@@ -12,7 +12,9 @@
       "bundleIdentifier": "com.gustavocypriano.revoice",
       "infoPlist": {
         "NSCameraUsageDescription": "ReVoice uses your camera to suggest possible communication intents from a photo.",
-        "NSPhotoLibraryUsageDescription": "ReVoice uses a selected photo to suggest possible communication intents."
+        "NSPhotoLibraryUsageDescription": "ReVoice uses a selected photo to suggest possible communication intents.",
+        "NSSpeechRecognitionUsageDescription": "Allow $(PRODUCT_NAME) to use speech recognition.",
+        "NSMicrophoneUsageDescription": "Allow $(PRODUCT_NAME) to use the microphone."
       }
     },
     "android": {
@@ -21,7 +23,14 @@
         "backgroundColor": "#07143B",
         "foregroundImage": "./assets/branding/revoice-android-adaptive-icon.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -63,6 +72,12 @@
       ],
       "expo-asset",
       "expo-speech-recognition"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ca891d97-b37a-4c25-8d0d-18419c1cf2a6"
+      }
+    }
   }
 }
