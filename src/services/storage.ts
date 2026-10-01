@@ -5,10 +5,13 @@ const HISTORY_KEY = '@revoice/history';
 const ONBOARDING_KEY = '@revoice/onboarding';
 const QUICK_CARDS_KEY = '@revoice/quick-cards';
 const PROFILE_KEY = '@revoice/care-profile';
+const SETTINGS_KEY = '@revoice/settings';
 
 export type CareProfile = { name: string; people: string; places: string; routine: string; preferences: string };
 export type QuickCard = { icon: string; label: string; text: string };
 export const emptyCareProfile: CareProfile = { name: '', people: '', places: '', routine: '', preferences: '' };
+export type AppSettings = { darkMode: boolean; defaultSlower: boolean };
+export const defaultAppSettings: AppSettings = { darkMode: false, defaultSlower: false };
 
 export async function hasCompletedOnboarding() { return (await AsyncStorage.getItem(ONBOARDING_KEY)) === 'true'; }
 export async function completeOnboarding() { await AsyncStorage.setItem(ONBOARDING_KEY, 'true'); }
@@ -28,3 +31,5 @@ export async function getQuickCards(fallback: QuickCard[]) { try { const saved =
 export async function saveQuickCards(cards: QuickCard[]) { await AsyncStorage.setItem(QUICK_CARDS_KEY, JSON.stringify(cards)); }
 export async function getCareProfile(): Promise<CareProfile> { try { return { ...emptyCareProfile, ...JSON.parse((await AsyncStorage.getItem(PROFILE_KEY)) ?? '{}') }; } catch { return emptyCareProfile; } }
 export async function saveCareProfile(profile: CareProfile) { await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }
+export async function getAppSettings(): Promise<AppSettings> { try { return { ...defaultAppSettings, ...JSON.parse((await AsyncStorage.getItem(SETTINGS_KEY)) ?? '{}') }; } catch { return defaultAppSettings; } }
+export async function saveAppSettings(settings: AppSettings) { await AsyncStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }

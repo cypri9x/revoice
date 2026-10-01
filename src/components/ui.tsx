@@ -4,17 +4,24 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, shadow } from '../theme';
+import { useAppSettings } from '../context/app-settings';
 
 export function Brand({ compact = false }: { compact?: boolean }) {
-  return <View style={styles.brand}><Image source={require('../../assets/branding/revoice-symbol-transparent.png')} style={{ width: compact ? 34 : 44, height: compact ? 34 : 44 }} resizeMode="contain" /><Text style={[styles.brandText, compact && { fontSize: 21 }]}>ReVoice</Text></View>;
+  const { settings } = useAppSettings();
+  return <View style={styles.brand}><Image source={require('../../assets/branding/revoice-symbol-transparent.png')} style={{ width: compact ? 34 : 44, height: compact ? 34 : 44 }} resizeMode="contain" /><Text style={[styles.brandText, compact && { fontSize: 21 }, settings.darkMode && styles.darkText]}>ReVoice</Text></View>;
 }
 export function GradientButton({ title, icon = 'sparkles', onPress, disabled, loading, style }: { title: string; icon?: keyof typeof Ionicons.glyphMap; onPress: () => void; disabled?: boolean; loading?: boolean; style?: ViewStyle }) {
   return <Pressable accessibilityRole="button" accessibilityLabel={title} disabled={disabled || loading} onPress={onPress} style={({ pressed }) => [styles.buttonWrap, style, pressed && { transform: [{ scale: 0.985 }] }, (disabled || loading) && { opacity: 0.55 }]}><LinearGradient colors={['#4F8CFF', '#2867FA']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.button}>{loading ? <ActivityIndicator color="white" /> : <><Ionicons name={icon} size={20} color="white" /><Text style={styles.buttonText}>{title}</Text></>}</LinearGradient></Pressable>;
 }
 export function ScreenHeader({ title, onBack, action }: { title?: string; onBack?: () => void; action?: ReactNode }) {
-  return <View style={styles.header}>{onBack ? <Pressable onPress={onBack} hitSlop={12} accessibilityRole="button" accessibilityLabel="Go back"><Ionicons name="chevron-back" size={28} color={colors.text} /></Pressable> : <Brand compact />}{title ? <Text style={styles.headerTitle}>{title}</Text> : <View style={{ flex: 1 }} />}{action ?? <View style={{ width: 28 }} />}</View>;
+  const { settings } = useAppSettings();
+  const foreground = settings.darkMode ? '#F8FAFF' : colors.text;
+  return <View style={styles.header}>{onBack ? <Pressable onPress={onBack} hitSlop={12} accessibilityRole="button" accessibilityLabel="Go back"><Ionicons name="chevron-back" size={28} color={foreground} /></Pressable> : <Brand compact />}{title ? <Text style={[styles.headerTitle, settings.darkMode && styles.darkText]}>{title}</Text> : <View style={{ flex: 1 }} />}{action ?? <View style={{ width: 28 }} />}</View>;
 }
-export function ErrorCard({ message }: { message: string }) { return <View style={styles.error}><Ionicons name="cloud-offline-outline" size={22} color={colors.danger} /><View style={{ flex: 1 }}><Text style={styles.errorTitle}>We couldn't create suggestions right now.</Text><Text style={styles.errorText}>{message} Your Quick Speak tools are still available.</Text></View></View>; }
+export function ErrorCard({ message }: { message: string }) {
+  const networkError = /fetch|network|connection|internet/i.test(message);
+  return <View style={styles.error}><Ionicons name={networkError ? 'wifi-outline' : 'sparkles-outline'} size={22} color={colors.danger} /><View style={{ flex: 1 }}><Text style={styles.errorTitle}>{networkError ? 'Connection paused' : 'Let’s try that again'}</Text><Text style={styles.errorText}>{networkError ? 'We couldn’t reach ReVoice right now. Check your connection and try once more.' : 'We couldn’t create a clear suggestion this time. Add a small detail or try again.'}</Text></View></View>;
+}
 
 const mainTabs = [
   { icon: 'home-outline', activeIcon: 'home', label: 'Home', path: '/home' },
@@ -25,7 +32,8 @@ const mainTabs = [
 
 export function BottomNav({ active }: { active: 'Home' | 'History' | 'Profile' | 'Settings' }) {
   const router = useRouter();
-  return <View style={styles.nav}>{mainTabs.map(tab => {
+  const { settings } = useAppSettings();
+  return <View style={[styles.nav, settings.darkMode && styles.navDark]}>{mainTabs.map(tab => {
     const selected = tab.label === active;
     return <Pressable key={tab.label} accessibilityRole="tab" accessibilityState={{ selected }} accessibilityLabel={tab.label} onPress={() => router.replace(tab.path)} style={styles.navItem}><Ionicons name={selected ? tab.activeIcon : tab.icon} size={23} color={selected ? colors.primary : colors.muted} /><Text style={[styles.navText, selected && styles.navTextActive]}>{tab.label}</Text></Pressable>;
   })}</View>;
@@ -40,4 +48,6 @@ const styles = StyleSheet.create({
   navItem: { flex: 1, minWidth: 64, alignItems: 'center', gap: 3 },
   navText: { fontFamily: 'Jakarta-Medium', fontSize: 10, color: colors.muted },
   navTextActive: { color: colors.primary },
+  navDark: { backgroundColor: '#0D172A', borderColor: '#263653' },
+  darkText: { color: '#F8FAFF' },
 });

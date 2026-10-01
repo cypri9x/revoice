@@ -8,7 +8,7 @@ import { colors, radius } from '../theme';
 import { CareProfile, emptyCareProfile, getCareProfile, saveCareProfile } from '../services/storage';
 
 const fields: { key: keyof CareProfile; icon: keyof typeof Ionicons.glyphMap; title: string; placeholder: string }[] = [
-  { key: 'name', icon: 'person', title: 'My name', placeholder: 'Example: Gustavo' },
+  { key: 'name', icon: 'person', title: 'My name', placeholder: 'Example: John' },
   { key: 'people', icon: 'people', title: 'People', placeholder: 'Example: Maria — daughter' },
   { key: 'places', icon: 'location', title: 'Places', placeholder: 'Example: home, park, university' },
   { key: 'routine', icon: 'time', title: 'Routine', placeholder: 'Example: therapy on Tuesday mornings' },
