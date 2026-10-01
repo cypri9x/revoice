@@ -6,8 +6,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { colors, radius, shadow } from '../theme';
 import { useAppSettings } from '../context/app-settings';
 
-export function Brand({ compact = false }: { compact?: boolean }) {
-  return <View style={styles.brand}><Image source={require('../../assets/branding/revoice-symbol-transparent.png')} style={{ width: compact ? 34 : 44, height: compact ? 34 : 44 }} resizeMode="contain" /><Text style={[styles.brandText, compact && { fontSize: 21 }]}>ReVoice</Text></View>;
+export function Brand({ compact = false, dark = false }: { compact?: boolean; dark?: boolean }) {
+  return <View style={styles.brand}><Image source={require('../../assets/branding/revoice-symbol-transparent.png')} style={{ width: compact ? 34 : 44, height: compact ? 34 : 44 }} resizeMode="contain" /><Text style={[styles.brandText, compact && { fontSize: 21 }, dark && styles.darkText]}>ReVoice</Text></View>;
 }
 export function GradientButton({ title, icon = 'sparkles', onPress, disabled, loading, style }: { title: string; icon?: keyof typeof Ionicons.glyphMap; onPress: () => void; disabled?: boolean; loading?: boolean; style?: ViewStyle }) {
   return <Pressable accessibilityRole="button" accessibilityLabel={title} disabled={disabled || loading} onPress={onPress} style={({ pressed }) => [styles.buttonWrap, style, pressed && { transform: [{ scale: 0.985 }] }, (disabled || loading) && { opacity: 0.55 }]}><LinearGradient colors={['#4F8CFF', '#2867FA']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.button}>{loading ? <ActivityIndicator color="white" /> : <><Ionicons name={icon} size={20} color="white" /><Text style={styles.buttonText}>{title}</Text></>}</LinearGradient></Pressable>;

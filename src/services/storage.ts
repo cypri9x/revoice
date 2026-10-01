@@ -27,7 +27,7 @@ export async function saveSpokenPhrase(text: string) {
   await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify([item, ...remaining].slice(0, 30)));
 }
 export async function setHistory(items: HistoryItem[]) { await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(items)); }
-export async function getQuickCards(fallback: QuickCard[]) { try { const saved = JSON.parse((await AsyncStorage.getItem(QUICK_CARDS_KEY)) ?? '[]'); return Array.isArray(saved) && saved.length ? saved as QuickCard[] : fallback; } catch { return fallback; } }
+export async function getQuickCards(fallback: QuickCard[]) { try { const raw = await AsyncStorage.getItem(QUICK_CARDS_KEY); if (raw === null) return fallback; const saved = JSON.parse(raw); return Array.isArray(saved) ? saved as QuickCard[] : fallback; } catch { return fallback; } }
 export async function saveQuickCards(cards: QuickCard[]) { await AsyncStorage.setItem(QUICK_CARDS_KEY, JSON.stringify(cards)); }
 export async function getCareProfile(): Promise<CareProfile> { try { return { ...emptyCareProfile, ...JSON.parse((await AsyncStorage.getItem(PROFILE_KEY)) ?? '{}') }; } catch { return emptyCareProfile; } }
 export async function saveCareProfile(profile: CareProfile) { await AsyncStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); }
