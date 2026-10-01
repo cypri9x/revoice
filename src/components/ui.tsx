@@ -7,16 +7,14 @@ import { colors, radius, shadow } from '../theme';
 import { useAppSettings } from '../context/app-settings';
 
 export function Brand({ compact = false }: { compact?: boolean }) {
-  const { settings } = useAppSettings();
-  return <View style={styles.brand}><Image source={require('../../assets/branding/revoice-symbol-transparent.png')} style={{ width: compact ? 34 : 44, height: compact ? 34 : 44 }} resizeMode="contain" /><Text style={[styles.brandText, compact && { fontSize: 21 }, settings.darkMode && styles.darkText]}>ReVoice</Text></View>;
+  return <View style={styles.brand}><Image source={require('../../assets/branding/revoice-symbol-transparent.png')} style={{ width: compact ? 34 : 44, height: compact ? 34 : 44 }} resizeMode="contain" /><Text style={[styles.brandText, compact && { fontSize: 21 }]}>ReVoice</Text></View>;
 }
 export function GradientButton({ title, icon = 'sparkles', onPress, disabled, loading, style }: { title: string; icon?: keyof typeof Ionicons.glyphMap; onPress: () => void; disabled?: boolean; loading?: boolean; style?: ViewStyle }) {
   return <Pressable accessibilityRole="button" accessibilityLabel={title} disabled={disabled || loading} onPress={onPress} style={({ pressed }) => [styles.buttonWrap, style, pressed && { transform: [{ scale: 0.985 }] }, (disabled || loading) && { opacity: 0.55 }]}><LinearGradient colors={['#4F8CFF', '#2867FA']} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.button}>{loading ? <ActivityIndicator color="white" /> : <><Ionicons name={icon} size={20} color="white" /><Text style={styles.buttonText}>{title}</Text></>}</LinearGradient></Pressable>;
 }
-export function ScreenHeader({ title, onBack, action }: { title?: string; onBack?: () => void; action?: ReactNode }) {
-  const { settings } = useAppSettings();
-  const foreground = settings.darkMode ? '#F8FAFF' : colors.text;
-  return <View style={styles.header}>{onBack ? <Pressable onPress={onBack} hitSlop={12} accessibilityRole="button" accessibilityLabel="Go back"><Ionicons name="chevron-back" size={28} color={foreground} /></Pressable> : <Brand compact />}{title ? <Text style={[styles.headerTitle, settings.darkMode && styles.darkText]}>{title}</Text> : <View style={{ flex: 1 }} />}{action ?? <View style={{ width: 28 }} />}</View>;
+export function ScreenHeader({ title, onBack, action, dark = false }: { title?: string; onBack?: () => void; action?: ReactNode; dark?: boolean }) {
+  const foreground = dark ? '#F8FAFF' : colors.text;
+  return <View style={styles.header}>{onBack ? <Pressable onPress={onBack} hitSlop={12} accessibilityRole="button" accessibilityLabel="Go back"><Ionicons name="chevron-back" size={28} color={foreground} /></Pressable> : <Brand compact />}{title ? <Text style={[styles.headerTitle, dark && styles.darkText]}>{title}</Text> : <View style={{ flex: 1 }} />}{action ?? <View style={{ width: 28 }} />}</View>;
 }
 export function ErrorCard({ message }: { message: string }) {
   const networkError = /fetch|network|connection|internet/i.test(message);

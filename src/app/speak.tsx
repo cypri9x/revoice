@@ -42,7 +42,7 @@ export default function Speak() {
   };
 
   return <SafeAreaView style={[styles.safe,dark&&styles.safeDark]}><View style={styles.content}>
-    <ScreenHeader onBack={() => router.back()} action={<Pressable hitSlop={12}><Ionicons name="ellipsis-horizontal" size={25} color={colors.muted} /></Pressable>} />
+    <ScreenHeader onBack={() => router.back()} dark={dark} action={<Pressable hitSlop={12}><Ionicons name="ellipsis-horizontal" size={25} color={colors.muted} /></Pressable>} />
     <View style={styles.phraseWrap}><Text adjustsFontSizeToFit numberOfLines={6} minimumFontScale={0.65} style={[styles.phrase,dark&&styles.textDark]}>{phrase}</Text></View>
     <View style={styles.wave}>{[10, 21, 34, 18, 27, 12, 24, 10].map((height, index) => <View key={index} style={[styles.bar, { height: speaking ? height * 1.35 : height, opacity: speaking ? 1 : 0.35 }]} />)}</View>
     <Animated.View style={{ transform: [{ scale: pulse }] }}><Pressable accessibilityRole="button" accessibilityLabel={speaking ? 'Stop speaking' : 'Speak phrase'} onPress={speaking ? () => { stopSpeaking(); setSpeaking(false); } : play} style={styles.speakOuter}><LinearGradient colors={['#4F8CFF', '#245EF5']} style={styles.speakButton}><Ionicons name={speaking ? 'stop' : 'play'} size={48} color="white" style={!speaking ? { marginLeft: 6 } : undefined} /></LinearGradient></Pressable></Animated.View>
